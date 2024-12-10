@@ -7,8 +7,6 @@ async function connect() {
       family: 4,
     });
     // await mongoose.connect(process.env.MongoURI,{
-    //     useNewUrlParser: true, 
-    //     useUnifiedTopology: true,
     //     family: 4,
     // })
     console.log("Database connection successful");

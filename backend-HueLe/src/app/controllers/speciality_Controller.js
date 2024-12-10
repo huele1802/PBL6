@@ -3,29 +3,8 @@ const Doctor = require("../models/Doctor");
 const cloudinary = require("../utils/cloudinary");
 
 const fs = require("fs");
-// const path = require('path')
-// const mime = require('mime-types')
-// const sharp = require('sharp')
-// const multer = require('multer')
-// const { promisify } = require('util')
 const mongoose = require("mongoose");
-
 require("dotenv").config();
-
-// const storage = multer.memoryStorage()
-
-// const upload = multer({
-//   storage: storage,
-//   fileFilter: (res, file, cb) => {
-//     if (file.mimetype === 'image/jpeg') {
-//       cb(null, true)
-//     } else {
-//       cb(new Error('Only JPG image files are allowed'))
-//     }
-//   },
-// }).single('speciality_image')
-
-// const uploadPromise = promisify(upload)
 
 class speciality_Controller {
   add_Speciality = async (req, res) => {
@@ -272,12 +251,10 @@ class speciality_Controller {
             .slice(-3)
             .join("/")
             .replace(/\.\w+$/, "");
-            
+
           return public_Id; //public_Id
         })
         .filter((public_Id) => public_Id);
-
-      console.log(public_Ids);
 
       // Delete images from Cloudinary
       if (public_Ids.length > 0) {
@@ -285,7 +262,10 @@ class speciality_Controller {
           return new Promise((resolve, reject) => {
             cloudinary.uploader.destroy(public_Id, (error, result) => {
               console.log({ error, result });
-              if (error) return reject(error);
+              if (error) {
+                console.error(`Failed to delete ${public_Id}:`, error.message);
+                return resolve(null);
+              }
               resolve(result);
             });
           });

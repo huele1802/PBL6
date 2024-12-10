@@ -10,5 +10,7 @@ router.post('/soft-delete-region', region_Controller.soft_Delete_Region)
 router.post('/delete-region', region_Controller.perma_Delete_Region)
 router.post('/restore-region', region_Controller.restore_Deleted_Region)
 router.post('/get-region', region_Controller.get_Region)
+router.get('/region-doctor', region_Controller.countDoctorsByRegion)
+
 
 module.exports = router

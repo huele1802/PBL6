@@ -1,7 +1,10 @@
 const Region = require('../models/Region')
 const mongoose = require('mongoose')
+const Doctor = require('./../models/Doctor')
+
 
 class region_Controller {
+
     add_Region = async (req, res) => {
         try {
             // get info from body
@@ -189,6 +192,74 @@ class region_Controller {
             res.status(500).json({success: false, error: error.message})
         }
     }
+
+
+     countDoctorsByRegion = async (req, res) => {
+        try {
+          const result = await Doctor.aggregate([
+            {
+                $match: {
+                  region_id: { $ne: null },
+                  is_deleted: { $ne: true },
+                  verified: { $ne: false },
+                },
+              },
+              {
+                $addFields: {
+                  region_id: { $toObjectId: "$region_id" }, 
+                },
+              },
+            {
+              $group: {
+                _id: "$region_id", 
+                doctorCount: { $sum: 1 }, 
+              },
+            },
+            {
+              $lookup: {
+                from: "regions", 
+                localField: "_id", 
+                foreignField: "_id",
+                as: "regionDetails",
+              },
+            },
+            {
+                $match: {
+                  "regionDetails.is_deleted": { $ne: true }, 
+                },
+              },
+              {
+                $sort: {
+                  doctorCount: -1, 
+                },
+              },
+             
+              {
+                $limit: 5,
+              },
+        
+            {
+              $project: {
+                regionId: "$_id", 
+                doctorCount: 1, 
+                regionDetails: { $arrayElemAt: ["$regionDetails", 0] }, 
+              },
+            },
+          ]);
+      
+          if (!result.length) {
+            return res.status(404).json({ message: "No doctors found in any region." });
+          }
+      
+          return res.status(200).json({ data: result });
+        } catch (error) {
+          console.error("Error:", error);
+          return res.status(500).json({
+            error: "An error occurred while counting doctors by region.",
+          });
+        }
+      };
+      
 }
 
 module.exports = new region_Controller()

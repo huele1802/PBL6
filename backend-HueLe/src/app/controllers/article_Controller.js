@@ -3,27 +3,8 @@ const Doctor = require("../models/Doctor");
 const Speciality = require("../models/Speciality");
 const cloudinary = require("../utils/cloudinary");
 
-// const multer = require('multer')
-// const { promisify } = require('util')
-const fs = require("fs");
-// const path = require("path")
-// const mime = require("mime-types")
+const fs = require("fs")
 require("dotenv").config();
-
-// const storage = multer.memoryStorage()
-
-// const upload = multer({
-//     storage: storage,
-//     fileFilter: (res, file, cb) => {
-//         if (file.mimetype === 'image/jpeg') {
-//             cb(null, true)
-//         } else {
-//             cb(new Error('Only JPG image files are allowed'))
-//         }
-//     },
-// }).single('article_image')
-
-// const uploadPromise = promisify(upload)
 
 class article_Controller {
   add_Article = async (req, res) => {
@@ -327,7 +308,10 @@ class article_Controller {
         const cloudinary_Delete_Promises = public_Ids.map((public_Id) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader.destroy(public_Id, (error, result) => {
-              if (error) return reject(error);
+              if (error) {
+                console.error(`Failed to delete ${public_Id}:`, error.message)
+                return resolve(null)
+            }
               resolve(result);
             });
           });

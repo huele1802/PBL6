@@ -6,43 +6,16 @@ const Appointment = require("../models/Appointment");
 const cloudinary = require("../utils/cloudinary");
 
 const fs = require("fs");
-const path = require('path')
-// const crypto = require('crypto')
-const multer = require("multer");
-const { promisify } = require("util");
+const path = require("path");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
+// const multer = require("multer");
+// const { promisify } = require("util");
 
 require("dotenv").config();
 
 // const default_profile_img = process.env.DEFAULT_PROFILE_IMG
-const storage = multer.memoryStorage();
-
-const upload_pdf = multer({
-  storage: storage,
-  fileFilter: (res, file, cb) => {
-    if (file.mimetype === "application/pdf") {
-      cb(null, true);
-    } else {
-      cb(new Error("Only PDF files are allowed"));
-    }
-  },
-}).single("proof");
-
-// const upload_img = multer({
-//     storage: storage,
-//     fileFilter: (res, file, cb) =>{
-//         if(file.mimetype === 'image/jpeg'){
-//             cb(null, true)
-//         }else{
-//             cb(new Error('Only JPG image files are allowed'))
-//         }
-//     }
-// }).single('profile_image')
-
-const upload_Promise_pdf = promisify(upload_pdf);
-// const upload_Promise_img = promisify(upload_img)
 
 class account_Controller {
   create_Token = (_id, expiresIn = "1d") => {
@@ -151,17 +124,6 @@ class account_Controller {
           .populate("speciality_id", "name")
           .populate("region_id", "name");
       }
-
-      // const accounts_With_Png_Images = accounts.map((account) => {
-      //     const accountObject = account.toObject() // Convert Mongoose document to plain object
-
-      //     if (accountObject.profile_image && Buffer.isBuffer(accountObject.profile_image)) {
-      //         // Convert buffer to base64 string
-      //         accountObject.profile_image = `data:image/png;base64,${accountObject.profile_image.toString('base64')}`
-      //     }
-
-      //     return accountObject
-      // })
 
       res.status(200).json(accounts);
     } catch (error) {
@@ -355,61 +317,27 @@ class account_Controller {
       // Find the accounts to delete and retrieve their profile image public_ids
       const accounts = await User.find(
         { _id: { $in: account_Ids } },
-        "profile_image"
+        "profile_image proof"
       );
 
-      // Prepare an array of public_ids to delete from Cloudinary
-      const public_Ids = accounts
-        .map((account) => {
-          const image_Url = account.profile_image;
-
-          if (!image_Url) return null;
-
-          const public_Id = image_Url
-            .split("/")
-            .slice(-3)
-            .join("/")
-            .replace(/\.\w+$/, ""); // Extract public_id from URL
-
-          return public_Id;
-        })
-        .filter((public_Id) => public_Id);
-
-      const public_Proofs = accounts
-        .map((account) => {
-          const image_Url = account.proof;
-
-          if (!image_Url) return null;
-
-          const public_Id = image_Url
-            .split("/")
-            .slice(-3)
-            .join("/")
-            .replace(/\.\w+$/, ""); // Extract public_id from URL
-
-          return public_Id;
-        })
-        .filter((public_Id) => public_Id);
+      const public_Ids = accounts.flatMap((account) =>
+        [
+          account.profile_image
+            ? account.profile_image.split("/").slice(-3).join("/")
+            : null,
+          account.proof ? account.proof.split("/").slice(-3).join("/") : null,
+        ].filter(Boolean)
+      );
 
       // Delete images from Cloudinary
       if (public_Ids.length > 0) {
         const cloudinary_Delete_Promises = public_Ids.map((public_Id) => {
           return new Promise((resolve, reject) => {
             cloudinary.uploader.destroy(public_Id, (error, result) => {
-              if (error) return reject(error);
-              resolve(result);
-            });
-          });
-        });
-
-        await Promise.all(cloudinary_Delete_Promises); // Wait for all deletions to complete
-      }
-
-      if (public_Proofs.length > 0) {
-        const cloudinary_Delete_Promises = public_Proofs.map((public_Id) => {
-          return new Promise((resolve, reject) => {
-            cloudinary.uploader.destroy(public_Id, (error, result) => {
-              if (error) return reject(error);
+              if (error) {
+                console.error(`Failed to delete ${public_Id}:`, error.message);
+                return resolve(null);
+              }
               resolve(result);
             });
           });
@@ -430,82 +358,6 @@ class account_Controller {
       res.status(400).json({ error: error.message });
     }
   };
-
-  // forgot_password = async (req, res) => {
-  //   try {
-  //     const { email } = req.body;
-  //     const account = await User.findOne({ email });
-
-  //     if (!account) {
-  //       return res.status(404).json({ error: "Account not found" });
-  //     }
-
-  //     // Generate a reset token
-  //     const reset_Token = this.create_Token(account._id, "10m");
-
-  //     const transporter = nodemailer.createTransport({
-  //       service: process.env.EMAIL_HOST,
-  //       auth: {
-  //         user: process.env.EMAIL_USER,
-  //         pass: process.env.EMAIL_PASS,
-  //       },
-  //     });
-
-  //     const reset_URL = `${req.protocol}://${req.get(
-  //       "host"
-  //     )}/acc/reset-password/${reset_Token}`;
-  //     const mail_Options = {
-  //       from: process.env.EMAIL,
-  //       to: email,
-  //       subject: "Password Reset",
-  //       html: `
-  //                       <p>Please click on the following link to reset your password:</p>
-  //                       <a href="${reset_URL}">Reset Password</a>
-  //                       <p>This link will expire in 10 minutes</p>
-  //                   `,
-  //     };
-
-  //     await transporter.sendMail(mail_Options);
-
-  //     res
-  //       .status(200)
-  //       .json({ message: "Password reset link sent to your email" });
-  //   } catch (error) {
-  //     console.log(error.message);
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // };
-
-  // reset_password = async (req, res) => {
-  //   try {
-  //     const token = req.params.token;
-
-  //     // Verify the token
-  //     const decoded = jwt.verify(token, process.env.JWTSecret);
-  //     const user = await User.findById(decoded._id);
-
-  //     if (!user) {
-  //       return res.status(400).json({ error: "Invalid or expired token" });
-  //     }
-
-  //     const updated_user = await User.change_pass(
-  //       user.email,
-  //       process.env.DEFAULT_PASS,
-  //       true
-  //     );
-
-  //     res.status(200).json({
-  //       message: "Password changed successfully",
-  //     });
-  //   } catch (error) {
-  //     if (error.name === "TokenExpiredError") {
-  //       return res.status(400).json({
-  //         error: "Token has expired. Please request a new password reset.",
-  //       });
-  //     }
-  //     res.status(400).json({ error: error.message });
-  //   }
-  // };
 
   forgot_password = async (req, res) => {
     try {
@@ -533,11 +385,11 @@ class account_Controller {
       const mail_Options = {
         from: process.env.EMAIL,
         to: email,
-        subject: "Password Reset",
+        subject: "Đặt lại mật khẩu",
         html: `
-                    <p>Please click on the following link to reset your password:</p>
-                    <a href="${reset_URL}">Reset Password</a>
-                    <p>This link will expire in 10 minutes</p>
+                    <p>Xin hãy nhấn vào đường dẫn bên dưới để cài đặt lại mật khẩu:</p>
+                    <a href="${reset_URL}">Đặt lại mật khẩu</a>
+                    <p>Đường dẫn sẽ mất hiệu lực sau 10 phút</p>
                 `,
       };
 
@@ -586,7 +438,7 @@ class account_Controller {
       // Read the error HTML file
       const filePath = path.join(
         __dirname,
-        "../utils/landing_html/reset-password-error.html"
+        "../utils/landing_html/landing-error.html"
       );
       fs.readFile(filePath, "utf-8", (err, html) => {
         if (err) {
@@ -1033,9 +885,7 @@ class account_Controller {
   getProfileAdmin = async (req, res) => {
     try {
       const adminEmail = req.user;
-      const adminData = await User.findOne({ email: adminEmail }).select(
-        "-password"
-      );
+      const adminData = await User.findOne({ email: adminEmail });
 
       if (!adminData) {
         return res.status(404).json({ error: "Admin profile not found" });
@@ -1048,12 +898,106 @@ class account_Controller {
     }
   };
 
+  getTopDoctors = async (req, res) => {
+    try {
+      const result = await Appointment.aggregate([
+        {
+          $group: {
+            _id: "$doctor_id", // Group by doctor_id
+            appointmentCount: { $sum: 1 }, // Count the appointments
+          },
+        },
+        {
+          $sort: { appointmentCount: -1 },
+        },
+        {
+          $limit: 5,
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "doctorDetails",
+          },
+        },
+        {
+          $project: {
+            doctorId: "$_id",
+            appointmentCount: 1,
+            doctorDetails: { $arrayElemAt: ["$doctorDetails", 0] },
+          },
+        },
+      ]);
+
+      if (!result.length) {
+        return res.status(404).json({ message: "No appointments found." });
+      }
+
+      return res.status(200).json({ data: result });
+    } catch (err) {
+      console.error("Error:", err);
+      return res.status(500).json({
+        error: "An error occurred.",
+      });
+    }
+  };
+
+  getTopUsers = async (req, res) => {
+    try {
+      const result = await Appointment.aggregate([
+        {
+          $match: {
+            is_deleted: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            appointmentCount: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { appointmentCount: -1 },
+        },
+        {
+          $limit: 5,
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $project: {
+            userId: "$_id",
+            appointmentCount: 1,
+            userDetails: { $arrayElemAt: ["$userDetails", 0] },
+          },
+        },
+      ]);
+
+      if (!result.length) {
+        return res.status(404).json({ message: "No users found." });
+      }
+
+      return res.status(200).json({ data: result });
+    } catch (err) {
+      console.error("Error:", err);
+      return res.status(500).json({
+        error: "An error occurred.",
+      });
+    }
+  };
+
   doctorProfile = async (req, res) => {
     try {
       const doctorEmail = req.user;
 
       const profileData = await Doctor.findOne({ email: doctorEmail })
-        .select("-password")
         .populate("speciality_id", "name")
         .populate("region_id", "name");
 
@@ -1064,6 +1008,17 @@ class account_Controller {
       }
 
       res.json({ success: true, profileData });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Server error" });
+    }
+  };
+
+  userProfile = async (req, res) => {
+    try {
+      const user = req.user;
+
+      res.json({ success: true, user });
     } catch (error) {
       console.error(error);
       res.status(500).json({ success: false, message: "Server error" });
@@ -1104,6 +1059,56 @@ class account_Controller {
 
       if (!result.length) {
         return res.status(404).json({ message: "No appointments found." });
+      }
+
+      return res.status(200).json({ data: result });
+    } catch (err) {
+      console.error("Error:", err);
+      return res.status(500).json({
+        error: "An error occurred.",
+      });
+    }
+  };
+
+  getTopUsers = async (req, res) => {
+    try {
+      const result = await Appointment.aggregate([
+        {
+          $match: {
+            is_deleted: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            appointmentCount: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { appointmentCount: -1 },
+        },
+        {
+          $limit: 5,
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $project: {
+            userId: "$_id",
+            appointmentCount: 1,
+            userDetails: { $arrayElemAt: ["$userDetails", 0] },
+          },
+        },
+      ]);
+
+      if (!result.length) {
+        return res.status(404).json({ message: "No users found." });
       }
 
       return res.status(200).json({ data: result });

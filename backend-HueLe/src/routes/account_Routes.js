@@ -10,7 +10,11 @@ const upload = multer().none();
 const { upload_image, uploadPDF } = require("../middleware/multer");
 
 router.post("/login", account_Controller.acc_Login);
-router.post("/signup", uploadPDF.single("proof"), account_Controller.acc_Signup);
+router.post(
+  "/signup",
+  uploadPDF.single("proof"),
+  account_Controller.acc_Signup
+);
 router.post("/acc-list", account_Controller.get_Account_List);
 router.post("/get-acc-mail", account_Controller.get_Account_By_Mail);
 router.post("/get-acc/:id", account_Controller.get_Account_By_Id);
@@ -71,7 +75,12 @@ router.get(
   require_Auth.Auth_Doctor,
   account_Controller.doctorProfile
 );
-
+router.get(
+  "/get-user-profile",
+  require_Auth.Auth_User,
+  account_Controller.userProfile
+);
 router.get("/top-doctor", account_Controller.getTopDoctors);
+router.get("/top-users", account_Controller.getTopUsers);
 
 module.exports = router;
