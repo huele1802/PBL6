@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Account Confirmation</title> -->
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 250px;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+        }
+        button {
+            display: inline-block;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #00A6A9;
+            border-radius: 5px;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button:hover {
+            background-color: #007c7c;
+        }
+        .note {
+            color: #ff0000;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://res.cloudinary.com/doityourself/image/upload/v1732509707/MeDi-Booker_igd5wf.png" alt="Logo Icon">
+        <h1>Xác nhận tài khoản</h1>
+        <p>Xin chào <strong><%= username %></strong>,</p>
+        <p>Một tài khoản sử dụng email của bạn đã được tạo. Vui lòng nhấn vào nút bên dưới để kích hoạt tài khoản của bạn.</p>
+        
+        <form action="<%= confirm_Url %>" method="POST">
+            <button type="submit">Xác nhận tài khoản</button>
+        </form>
+        
+        <p>Nếu bạn không yêu cầu điều này, vui lòng bỏ qua email này.</p>
+        <p class="note">Lưu ý: Liên kết xác nhận này chỉ có hiệu lực trong vòng 1 ngày kể từ khi nhận được email.</p>
+    </div>
+</body>
+</html>

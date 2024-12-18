@@ -18,35 +18,35 @@ require("dotenv").config()
 // const default_profile_img = process.env.DEFAULT_PROFILE_IMG
 
 const Doctor_Schema = new Schema({
-  speciality_id: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Speciality',
-    required: false,
-  },
-  verified:{
-      type: Boolean,
-      default: false
-  },
-  active_hours: [{
-      day: String, // days of week
-      start_time: String, // hours:minutes
-      end_time: String, // hours:minutes
-      hour_type: String, // working or appointment
-      appointment_limit: Number // limit the number of appointments in the time frame
-  }],
-  bio: {
-      type: String,
-      default: 'undisclosed'
-  },
-  region_id: {
-      type: mongoose.Schema.Types.ObjectId, 
-      ref: 'Region', 
-      required: false 
-  },
-  proof: {
-      type: String,
-      required: false
-  }
+    speciality_id: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Speciality',
+        required: false,
+    },
+    verified:{
+        type: Boolean,
+        default: false
+    },
+    active_hours: [{
+        day: String, // days of week
+        start_time: String, // hours:minutes
+        end_time: String, // hours:minutes
+        hour_type: String, // working or appointment
+        appointment_limit: Number // limit the number of appointments in the time frame
+    }],
+    bio: {
+        type: String,
+        default: 'undisclosed'
+    },
+    region_id: {
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Region', 
+        required: false 
+    },
+    proof: {
+        type: String,
+        required: false
+    }
 })
 
 Doctor_Schema.path('active_hours').default(() => [])

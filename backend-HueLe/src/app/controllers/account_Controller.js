@@ -10,8 +10,8 @@ const path = require("path");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const mongoose = require("mongoose");
-// const multer = require("multer");
-// const { promisify } = require("util");
+const ejs = require("ejs");
+const crypto = require("crypto");
 
 require("dotenv").config();
 
@@ -40,13 +40,12 @@ class account_Controller {
       }
 
       const token = this.create_Token(acc._id);
-      const role = acc.role;
 
       if (acc instanceof Doctor) {
         const verified = acc.verified;
-        res.status(200).json({ email, token, role, verified });
+        res.status(200).json({ email, token, verified });
       } else {
-        res.status(200).json({ email, token, role });
+        res.status(200).json({ email, token });
       }
     } catch (error) {
       console.log(error.message);
@@ -61,7 +60,7 @@ class account_Controller {
       }
       // get info from body
       const { email, password, username, phone, is_doc } = req.body;
-      const role = "user";
+
       let acc;
 
       // add account
@@ -90,8 +89,15 @@ class account_Controller {
         acc = await User.add_User(email, password, username, phone);
       }
       // create token and respone
-      const token = this.create_Token(acc._id);
-      res.status(201).json({ email, token, role });
+      const token = this.create_Token(acc._id, "1d");
+
+      const confirm_Url = `${req.protocol}://${req.get(
+        "host"
+      )}/acc/confirm-acc/${token}`;
+
+      await this.send_Confirmation_Email(email, username, confirm_Url);
+
+      res.status(201).json({ email, token });
     } catch (error) {
       //if user account
       console.log(error.message);
@@ -141,13 +147,6 @@ class account_Controller {
         .populate("speciality_id", "name")
         .populate("region_id", "name");
 
-      // const accountObject = account.toObject()
-
-      // // Convert profile image buffer to base64 if it exists
-      // if (accountObject.profile_image && Buffer.isBuffer(accountObject.profile_image)) {
-      //     accountObject.profile_image = `data:image/png;base64,${accountObject.profile_image.toString('base64')}`
-      // }
-
       res.status(200).json(account);
     } catch (error) {
       console.log(error.message);
@@ -163,13 +162,6 @@ class account_Controller {
       let account = await User.findById(account_Id)
         .populate("speciality_id", "name")
         .populate("region_id", "name");
-
-      // const accountObject = account.toObject()
-
-      // // Convert profile image buffer to base64 if it exists
-      // if (accountObject.profile_image && Buffer.isBuffer(accountObject.profile_image)) {
-      //     accountObject.profile_image = `data:image/png;base64,${accountObject.profile_image.toString('base64')}`
-      // }
 
       res.status(200).json(account);
     } catch (error) {
@@ -382,15 +374,21 @@ class account_Controller {
       const reset_URL = `${req.protocol}://${req.get(
         "host"
       )}/acc/reset-password/${reset_Token}`;
+
+      // Render email content
+      const html_Content = await ejs.renderFile(
+        path.join(__dirname, "../views", "password-reset.ejs"),
+        {
+          username: account.username, // Pass the username
+          reset_URL, // Pass the reset URL
+        }
+      );
+
       const mail_Options = {
         from: process.env.EMAIL,
         to: email,
         subject: "Đặt lại mật khẩu",
-        html: `
-                    <p>Xin hãy nhấn vào đường dẫn bên dưới để cài đặt lại mật khẩu:</p>
-                    <a href="${reset_URL}">Đặt lại mật khẩu</a>
-                    <p>Đường dẫn sẽ mất hiệu lực sau 10 phút</p>
-                `,
+        html: html_Content,
       };
 
       await transporter.sendMail(mail_Options);
@@ -408,49 +406,53 @@ class account_Controller {
     try {
       const token = req.params.token;
 
+      if (!token) {
+        throw new Error("Token is required");
+      }
+
       // Verify the token
       const decoded = jwt.verify(token, process.env.JWTSecret);
       const user = await User.findById(decoded._id);
 
       if (!user) {
-        throw new Error("Invalid or expired token");
+        throw new Error("No user found");
       }
 
+      // Generate new password
+      const new_Password = crypto.randomBytes(4).toString("hex").slice(0, 8);
+
+      // Set new password
       const updated_user = await User.change_pass(
         user.email,
-        process.env.DEFAULT_PASS,
+        new_Password,
         true
       );
 
-      res.sendFile(
-        path.join(
-          __dirname,
-          "../utils/landing_html",
-          "reset-password-success.html"
-        )
+      // Render the return page with the new password
+      const html_Content = await ejs.renderFile(
+        path.join(__dirname, "../views", "password-reset-success.ejs"),
+        {
+          new_Password, // Pass the dynamic password to the template
+        }
       );
+
+      return res.status(200).send(html_Content);
     } catch (error) {
-      const errorMessage =
+      const error_Message =
         error.name === "TokenExpiredError"
-          ? "Đường dẫn xác nhận đã hết hạn. Xin thử lại đường dẫn mới sau."
+          ? "Đường dẫn xác nhận đã hết hạn. Xin hãy thử lại đường dẫn mới sau."
           : "Đã xảy ra sự cố. Xin thử lại sau.";
 
-      // Read the error HTML file
-      const filePath = path.join(
-        __dirname,
-        "../utils/landing_html/landing-error.html"
-      );
-      fs.readFile(filePath, "utf-8", (err, html) => {
-        if (err) {
-          return res.status(500).send("Server error");
+      // Render the error page with the error message
+      const html_Error_Content = await ejs.renderFile(
+        path.join(__dirname, "../views", "landing-error.ejs"),
+        {
+          error_Message, // Pass the error message to the template
         }
+      );
 
-        // Replace the placeholder in the HTML with the error message
-        const updatedHtml = html.replace("{{ERROR_MESSAGE}}", errorMessage);
-
-        // Send the updated HTML
-        res.send(updatedHtml);
-      });
+      // Send the error page as the response
+      return res.status(400).send(html_Error_Content);
     }
   };
 
@@ -465,6 +467,150 @@ class account_Controller {
     } catch (error) {
       console.log(error.message);
       res.status(400).json({ error: error.message });
+    }
+  };
+
+  getProfileAdmin = async (req, res) => {
+    try {
+      const adminEmail = req.user;
+      const adminData = await User.findOne({ email: adminEmail });
+
+      if (!adminData) {
+        return res.status(404).json({ error: "Admin profile not found" });
+      }
+
+      res.json({ success: true, adminData });
+    } catch (error) {
+      console.log(error.message);
+      res.status(400).json({ error: error.message });
+    }
+  };
+
+  getTopUsers = async (req, res) => {
+    try {
+      const result = await Appointment.aggregate([
+        {
+          $match: {
+            is_deleted: { $ne: true },
+          },
+        },
+        {
+          $group: {
+            _id: "$user_id",
+            appointmentCount: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { appointmentCount: -1 },
+        },
+        {
+          $limit: 5,
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "_id",
+            foreignField: "_id",
+            as: "userDetails",
+          },
+        },
+        {
+          $project: {
+            userId: "$_id",
+            appointmentCount: 1,
+            userDetails: { $arrayElemAt: ["$userDetails", 0] },
+          },
+        },
+      ]);
+
+      if (!result.length) {
+        return res.status(404).json({ message: "No users found." });
+      }
+
+      return res.status(200).json({ data: result });
+    } catch (err) {
+      console.error("Error:", err);
+      return res.status(500).json({
+        error: "An error occurred.",
+      });
+    }
+  };
+
+  send_Confirmation_Email = async (email, username, confirm_Url) => {
+    // Configure email transporter
+    const transporter = nodemailer.createTransport({
+      service: process.env.EMAIL_HOST,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+      },
+    });
+
+    const email_Template_Path = path.join(
+      __dirname,
+      "../views",
+      "account-confirmation.ejs"
+    );
+
+    // Render email content
+    const html_Content = await ejs.renderFile(email_Template_Path, {
+      username,
+      confirm_Url,
+    });
+
+    const mail_Options = {
+      from: process.env.EMAIL,
+      to: email,
+      subject: "Xác nhận tài khoản",
+      html: html_Content,
+    };
+
+    await transporter.sendMail(mail_Options);
+  };
+
+  confirm_Account = async (req, res) => {
+    try {
+      const token = req.params.token;
+
+      if (!token) {
+        throw new Error("Token is required");
+      }
+
+      // Verify the token
+      const decoded = jwt.verify(token, process.env.JWTSecret);
+
+      // Update user's status
+      const user = await User.findByIdAndUpdate(
+        decoded._id,
+        { is_deleted: false },
+        { new: true }
+      );
+
+      if (!user) {
+        throw new Error("No user found");
+      }
+
+      return res
+        .status(200)
+        .send(
+          "<h1>Đã xác nhận tài khoản thành công (cái này để tạm, sau sẽ thay bằng đường dẫn)</h1>"
+        );
+    } catch (error) {
+      const error_Message =
+        error.name === "TokenExpiredError"
+          ? "Đường dẫn xác nhận đã hết hạn. Xin hãy thử lại đường dẫn mới sau."
+          : "Đã xảy ra sự cố. Xin thử lại sau.";
+
+      // Render the error page with the error message
+      const html_Error_Content = await ejs.renderFile(
+        path.join(__dirname, "../views", "landing-error.ejs"),
+        {
+          error_Message, // Pass the error message to the template
+        }
+      );
+
+      // Send the error page as the response
+      return res.status(400).send(html_Error_Content);
     }
   };
 
@@ -882,22 +1028,6 @@ class account_Controller {
     }
   };
 
-  getProfileAdmin = async (req, res) => {
-    try {
-      const adminEmail = req.user;
-      const adminData = await User.findOne({ email: adminEmail });
-
-      if (!adminData) {
-        return res.status(404).json({ error: "Admin profile not found" });
-      }
-
-      res.json({ success: true, adminData });
-    } catch (error) {
-      console.log(error.message);
-      res.status(400).json({ error: error.message });
-    }
-  };
-
   getTopDoctors = async (req, res) => {
     try {
       const result = await Appointment.aggregate([
@@ -932,56 +1062,6 @@ class account_Controller {
 
       if (!result.length) {
         return res.status(404).json({ message: "No appointments found." });
-      }
-
-      return res.status(200).json({ data: result });
-    } catch (err) {
-      console.error("Error:", err);
-      return res.status(500).json({
-        error: "An error occurred.",
-      });
-    }
-  };
-
-  getTopUsers = async (req, res) => {
-    try {
-      const result = await Appointment.aggregate([
-        {
-          $match: {
-            is_deleted: { $ne: true },
-          },
-        },
-        {
-          $group: {
-            _id: "$user_id",
-            appointmentCount: { $sum: 1 },
-          },
-        },
-        {
-          $sort: { appointmentCount: -1 },
-        },
-        {
-          $limit: 5,
-        },
-        {
-          $lookup: {
-            from: "users",
-            localField: "_id",
-            foreignField: "_id",
-            as: "userDetails",
-          },
-        },
-        {
-          $project: {
-            userId: "$_id",
-            appointmentCount: 1,
-            userDetails: { $arrayElemAt: ["$userDetails", 0] },
-          },
-        },
-      ]);
-
-      if (!result.length) {
-        return res.status(404).json({ message: "No users found." });
       }
 
       return res.status(200).json({ data: result });

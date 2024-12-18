@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- <title>Appointment Reminder</title> -->
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 250px;
+            margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        p {
+            color: #666;
+            line-height: 1.6;
+            text-align: left;
+        }
+        .appointment-details {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            text-align: left;
+        }
+        .appointment-details span {
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://res.cloudinary.com/doityourself/image/upload/v1732509707/MeDi-Booker_igd5wf.png" alt="MediBooker Logo">
+        <h1>Nhắc Lịch Hẹn Khám</h1>
+        <p>Cảm ơn bạn đã đặt lịch khám qua MediBooker. Dưới đây là thông tin lịch khám của bạn:</p>
+        <div class="appointment-details">
+            <p><span>Bác sĩ:</span> <%= doctor %></p>
+            <p><span>Ngày hẹn khám:</span> <%= appointment_Date %></p>
+            <p><span>Khung giờ khám:</span> <%= appointment_time_start %> - <%= appointment_time_end %></p>
+        </div>
+        <p>Xin hãy có mặt đúng giờ khám.</p>
+        <p class="footer">Trân trọng! <br> MediBooker Team</p>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        img {
+            max-width: 250px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #d9534f; /* Red color for error */
+        }
+        .error-message {
+            color: #d9534f; /* Red color for error message */
+            font-weight: bold;
+        }
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #ffffff;
+            background-color: #00A6A9;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        a:hover {
+            background-color: #007c7c;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="https://res.cloudinary.com/doityourself/image/upload/v1732509707/MeDi-Booker_igd5wf.png" alt="Logo Icon">
+        <h1>Oops!</h1>
+        <p class="error-message"><%= error_Message %></p>
+        <!-- <a href="">Trở lại</a> -->
+    </div>
+    
+</body>
+</html>

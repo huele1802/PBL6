@@ -4,8 +4,14 @@ const {upload_image} = require('../middleware/multer')
 const express = require('express')
 const router = express.Router()
 
-router.post('/get-speciality-list', speciality_Controller.get_Speciality_List)
-router.get('/get-speciality/:id', speciality_Controller.get_Speciality_By_ID)
+router.post(
+    '/get-speciality-list', 
+    speciality_Controller.get_Speciality_List
+)
+router.get(
+    '/get-speciality/:id', 
+    speciality_Controller.get_Speciality_By_ID
+)
 router.post(
     '/add-speciality',
     upload_image.single('speciality_image'), 
@@ -20,13 +26,18 @@ router.post(
     '/soft-delete-speciality',
     speciality_Controller.soft_Delete_Specialty
 )
-router.post('/delete-speciality', speciality_Controller.perma_Delete_Specialty)
+router.post(
+    '/delete-speciality', 
+    speciality_Controller.perma_Delete_Specialty
+)
 router.post(
     '/restore-speciality',
     speciality_Controller.restore_Deleted_Specialty
 )
-router.get('/get-spec/:id', speciality_Controller.getSpecData)
-
+router.get(
+    '/get-spec/:id', 
+    speciality_Controller.getSpecData
+)
 router.get(
     '/get-doc-count',
     speciality_Controller.getDoctorsCountPerSpeciality
