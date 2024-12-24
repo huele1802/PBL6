@@ -12,6 +12,7 @@
                 background-color: #f9f9f9;
                 text-align: center;
             }
+
             .container {
                 max-width: 600px;
                 margin: 0 auto;
@@ -20,6 +21,7 @@
                 border-radius: 8px;
                 box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             }
+
             img {
                 max-width: 250px;
                 margin-bottom: 10px;
@@ -27,26 +29,24 @@
                 margin-left: auto;
                 margin-right: auto;
             }
+
             h1 {
                 color: #333;
                 margin-bottom: 20px;
                 text-align: center;
             }
+
             p {
                 color: #666;
                 line-height: 1.6;
                 text-align: left;
             }
-            .appointment-details {
-                margin-top: 20px;
-                padding: 10px;
-                background-color: #f1f1f1;
-                border-radius: 5px;
-                text-align: left;
-            }
-            .appointment-details span {
+
+            span {
                 font-weight: bold;
+                color: #00a6a9;
             }
+
             .footer {
                 margin-top: 20px;
                 color: #999;
@@ -54,24 +54,25 @@
             }
         </style>
     </head>
+
     <body>
         <div class="container">
             <img
                 src="https://res.cloudinary.com/doityourself/image/upload/v1732509707/MeDi-Booker_igd5wf.png"
                 alt="MediBooker Logo" />
-            <h1>Nhắc Lịch Hẹn Khám</h1>
+            <h1>Thông báo huỷ lịch hẹn</h1>
+            <p>Chào bác sĩ <span><%= doctor %></span>,</p>
             <p>
-                Cảm ơn bạn đã đặt lịch khám qua MediBooker. Dưới đây là thông tin lịch khám của bạn:
+                Lịch hẹn khám với bệnh nhân <span><%= user %></span> vào ngày
+                <span><%= appointment_Date %></span> từ
+                <span><%= appointment_time_start %></span> đến
+                <span><%= appointment_time_end %></span> đã bị hủy.
             </p>
-            <div class="appointment-details">
-                <p><span>Bác sĩ:</span> <%= doctor %></p>
-                <p><span>Ngày hẹn khám:</span> <%= appointment_Date %></p>
-                <p>
-                    <span>Khung giờ khám:</span> <%= appointment_time_start %> - <%=
-                    appointment_time_end %>
-                </p>
-            </div>
-            <p>Xin hãy có mặt đúng giờ khám.</p>
+            <p>
+                Nếu cần thêm thông tin, vui lòng kiểm tra hệ thống hoặc liên hệ với đội ngũ
+                MediBooker.
+            </p>
+
             <p class="footer">
                 Trân trọng! <br />
                 MediBooker Team

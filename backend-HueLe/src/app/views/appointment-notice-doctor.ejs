@@ -60,18 +60,44 @@
                 src="https://res.cloudinary.com/doityourself/image/upload/v1732509707/MeDi-Booker_igd5wf.png"
                 alt="MediBooker Logo" />
             <h1>Nhắc Lịch Hẹn Khám</h1>
+            <p>Kính chào Bác sĩ,</p>
             <p>
-                Cảm ơn bạn đã đặt lịch khám qua MediBooker. Dưới đây là thông tin lịch khám của bạn:
+                Bạn vừa nhận được một lịch khám mới qua hệ thống MediBooker. Đây là cơ hội để hỗ trợ
+                bệnh nhân và nâng cao chất lượng dịch vụ chăm sóc sức khỏe. Dưới đây là thông tin
+                chi tiết về lịch khám:
             </p>
             <div class="appointment-details">
-                <p><span>Bác sĩ:</span> <%= doctor %></p>
+                <p><span>Họ tên bệnh nhân:</span> <%= user %></p>
                 <p><span>Ngày hẹn khám:</span> <%= appointment_Date %></p>
                 <p>
                     <span>Khung giờ khám:</span> <%= appointment_time_start %> - <%=
                     appointment_time_end %>
                 </p>
+                <p><span>Tình trạng sức khoẻ: </span> <%= health_status %></p>
+                <p><span>Bệnh nền: </span> <%= underlying_condition %></p>
+                <p><span>Liên hệ: </span> <%= phone %></p>
             </div>
-            <p>Xin hãy có mặt đúng giờ khám.</p>
+            <p>Hướng dẫn tiếp theo dành cho Bác sĩ:</p>
+            <ul>
+                <li>
+                    Vui lòng kiểm tra lịch khám này trong hệ thống MediBooker để xác nhận và đảm bảo
+                    sẵn sàng tiếp nhận bệnh nhân.
+                </li>
+                <li>
+                    Nếu có bất kỳ thay đổi hoặc cần liên hệ với bệnh nhân trước, hãy sử dụng thông
+                    tin liên hệ trên.
+                </li>
+                <li>
+                    Chuẩn bị các tài liệu, thiết bị cần thiết hoặc các câu hỏi liên quan để đảm bảo
+                    buổi khám diễn ra hiệu quả.
+                </li>
+            </ul>
+            <p>
+                Cảm ơn Bác sĩ đã đồng hành cùng MediBooker trong hành trình nâng cao sức khỏe cộng
+                đồng. Nếu cần hỗ trợ thêm, vui lòng liên hệ đội ngũ hỗ trợ của chúng tôi qua hotline
+                hoặc email.
+            </p>
+
             <p class="footer">
                 Trân trọng! <br />
                 MediBooker Team

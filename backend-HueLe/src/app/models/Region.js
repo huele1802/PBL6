@@ -1,16 +1,16 @@
-const mongoose = require('mongoose')
+const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 const Region = new Schema({
-    name: { 
+    name: {
         type: String,
         unique: true,
-        required: true 
+        required: true,
     },
-    is_deleted: { 
-        type: Boolean, 
-        default: false 
-    }
+    is_deleted: {
+        type: Boolean,
+        default: false,
+    },
 })
 
-module.exports = mongoose.model('Region', Region)
+module.exports = mongoose.model("Region", Region)
