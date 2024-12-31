@@ -23,7 +23,7 @@ router.post("/:post_id/comment/:comment_id/del", post_Controller.del_Comment)
 router.post("/search-post", post_Controller.search_Post_By_Title_and_Content)
 router.get("/get-top-post", post_Controller.getTop5MostCommentedPosts)
 router.get("/get-top-user-comment", post_Controller.getUserWithMostComments)
-
 router.post("/get-post-month", post_Controller.countPostsByMonth)
+router.post("/get-comment/:id", post_Controller.get_Comments)
 
 module.exports = router

@@ -116,7 +116,6 @@ class account_Controller {
 
             if (user === true) {
                 // Handle users
-
                 query.__t = { $ne: "Doctor" }
 
                 accounts = await User.find(query)
@@ -700,6 +699,27 @@ class account_Controller {
             return res.status(500).json({
                 error: "An error occurred.",
             })
+        }
+    }
+
+    get_Account_Status = async (req, res) => {
+        try {
+            const { email } = req.body
+
+            if (!email) {
+                return res.status(400).json({ message: "Email is required" })
+            }
+
+            const user = await User.findOne({ email })
+
+            if (!user) {
+                return res.status(404).json({ message: "No user found" })
+            }
+
+            return res.status(200).json({ is_deleted: user.is_deleted })
+        } catch (error) {
+            console.log(error.message)
+            res.status(400).json({ error: error.message })
         }
     }
 }

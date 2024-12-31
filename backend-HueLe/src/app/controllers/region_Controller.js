@@ -152,17 +152,22 @@ class region_Controller {
     get_Region = async (req, res) => {
         try {
             const { region_Id } = req.body
-
             //   console.log("Received region_Id:", region_Id)
 
             if (!mongoose.Types.ObjectId.isValid(region_Id)) {
-                return res.status(400).json({ success: false, message: "Invalid region ID format" })
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid region ID format",
+                })
             }
 
             const region = await Region.findById(region_Id)
 
             if (!region) {
-                return res.status(404).json({ success: false, message: "Region not found" })
+                return res.status(404).json({
+                    success: false,
+                    message: "Region not found",
+                })
             }
 
             res.status(200).json({ success: true, data: region })

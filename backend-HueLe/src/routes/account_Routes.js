@@ -1,12 +1,8 @@
 const account_Controller = require("../app/controllers/account_Controller")
 const require_Auth = require("../middleware/require_Auth")
 
-const jwt = require("jsonwebtoken")
-
 const express = require("express")
 const router = express.Router()
-const multer = require("multer")
-const upload = multer().none()
 const { upload_image, uploadPDF } = require("../middleware/multer")
 
 router.post("/login", account_Controller.acc_Login)

@@ -10,6 +10,10 @@ router.post("/create-article", upload_image.single("article_image"), article_Con
 router.get("/get-article/:id", article_Controller.get_Article)
 router.post("/get-all-article", article_Controller.get_All_Article)
 router.post("/get-all-article-by-doctor", article_Controller.get_all_Article_By_Email)
+router.post("/create-article", upload_image.single("article_image"), article_Controller.add_Article)
+router.get("/get-article/:id", article_Controller.get_Article)
+router.post("/get-all-article", article_Controller.get_All_Article)
+router.post("/get-all-article-by-doctor", article_Controller.get_all_Article_By_Email)
 router.post(
     "/get-all-article-by-speciality",
     article_Controller.get_all_Article_by_Doctor_Speciality

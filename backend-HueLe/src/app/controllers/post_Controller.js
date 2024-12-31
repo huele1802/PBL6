@@ -495,6 +495,27 @@ class post_Controller {
             })
         }
     }
+
+    get_Comments = async (req, res) => {
+        try {
+            const post_id = req.params.id
+
+            const post = await Post.findById(post_id)
+                .select("post_comments")
+                .populate("post_comments.replier", "email username __t profile_image")
+
+            if (!post) {
+                return res.status(404).json({ error: "Post not found" })
+            }
+
+            res.status(200).json({
+                success: true,
+                comments: post.post_comments,
+            })
+        } catch (error) {
+            res.status(400).json({ error: error.message })
+        }
+    }
 }
 
 module.exports = new post_Controller()

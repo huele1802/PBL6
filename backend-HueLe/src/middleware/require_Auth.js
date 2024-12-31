@@ -11,7 +11,10 @@ class requireAuth {
         const { authorization } = req.headers
 
         if (!authorization) {
-            return res.status(404).json({ error: "Authorization token is required", logout: true })
+            return res.status(404).json({
+                error: "Authorization token is required",
+                logout: true,
+            })
         }
 
         const token = authorization.split(" ")[1]
@@ -23,7 +26,9 @@ class requireAuth {
             const info = await Admin_Access.findOne({ user_id: _id }).populate("user_id", "email")
 
             if (!info) {
-                return res.status(401).json({ error: "Not authorized. Admin access required." })
+                return res.status(401).json({
+                    error: "Not authorized. Admin access required.",
+                })
             }
 
             req.user = {
@@ -44,7 +49,10 @@ class requireAuth {
         const { authorization } = req.headers
 
         if (!authorization) {
-            return res.status(401).json({ error: "Authorization token is required", logout: true })
+            return res.status(401).json({
+                error: "Authorization token is required",
+                logout: true,
+            })
         }
 
         const token = authorization.split(" ")[1]
@@ -66,7 +74,9 @@ class requireAuth {
         const { authorization } = req.headers
 
         if (!authorization) {
-            return res.status(401).json({ error: "Authorization token is required" })
+            return res.status(401).json({
+                error: "Authorization token is required",
+            })
         }
 
         const token = authorization.split(" ")[1]
