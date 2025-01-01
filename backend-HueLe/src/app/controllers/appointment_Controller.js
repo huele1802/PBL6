@@ -129,7 +129,7 @@ class appointment_Controller {
             const timeZoneOffset = 7 * 60 * 60 * 1000 // UTC+7 offset in milliseconds
             const local_Time = new Date(utc_Time_Start.getTime() + timeZoneOffset)
 
-            const appointment_Date = `${local_Time.getDate()}- ${
+            const appointment_Date = `${local_Time.getDate()} - ${
                 local_Time.getMonth() + 1
             } - ${local_Time.getFullYear()}`
 
@@ -537,9 +537,10 @@ class appointment_Controller {
         try {
             const appointment_id = req.params.id
             if (!mongoose.Types.ObjectId.isValid(appointment_id)) {
-                return res
-                    .status(400)
-                    .json({ success: false, message: "Invalid Appointment ID format" })
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid Appointment ID format",
+                })
             }
 
             const appointmentData = await Appointment.findById(appointment_id)
