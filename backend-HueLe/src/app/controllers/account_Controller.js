@@ -356,8 +356,8 @@ class account_Controller {
                         })
                     })
                 })
-
-                await Promise.all(cloudinary_Delete_Promises) // Wait for all deletions to complete
+                // Wait for all deletions to complete
+                await Promise.all(cloudinary_Delete_Promises)
             }
 
             // delete
@@ -430,7 +430,9 @@ class account_Controller {
 
             await transporter.sendMail(mail_Options)
 
-            res.status(200).json({ message: "Password reset link sent to your email" })
+            res.status(200).json({
+                message: "Password reset link sent to your email",
+            })
         } catch (error) {
             console.log(error.message)
             res.status(500).json({ error: error.message })
@@ -503,8 +505,8 @@ class account_Controller {
 
     getProfileAdmin = async (req, res) => {
         try {
-            const adminEmail = req.user
-            const adminData = await User.findOne({ email: adminEmail })
+            const { email } = req.user
+            const adminData = await User.findOne({ email })
 
             if (!adminData) {
                 return res.status(404).json({ error: "Admin profile not found" })
@@ -617,11 +619,7 @@ class account_Controller {
                 throw new Error("No user found")
             }
 
-            return res
-                .status(200)
-                .send(
-                    "<h1>Đã xác nhận tài khoản thành công (cái này để tạm, sau sẽ thay bằng đường dẫn)</h1>"
-                )
+            return res.status(200).send("<h1>Đã xác nhận tài khoản thành công</h1>")
         } catch (error) {
             const error_Message =
                 error.name === "TokenExpiredError"
@@ -649,56 +647,6 @@ class account_Controller {
         } catch (error) {
             console.error(error)
             res.status(500).json({ success: false, message: "Server error" })
-        }
-    }
-
-    getTopUsers = async (req, res) => {
-        try {
-            const result = await Appointment.aggregate([
-                {
-                    $match: {
-                        is_deleted: { $ne: true },
-                    },
-                },
-                {
-                    $group: {
-                        _id: "$user_id",
-                        appointmentCount: { $sum: 1 },
-                    },
-                },
-                {
-                    $sort: { appointmentCount: -1 },
-                },
-                {
-                    $limit: 5,
-                },
-                {
-                    $lookup: {
-                        from: "users",
-                        localField: "_id",
-                        foreignField: "_id",
-                        as: "userDetails",
-                    },
-                },
-                {
-                    $project: {
-                        userId: "$_id",
-                        appointmentCount: 1,
-                        userDetails: { $arrayElemAt: ["$userDetails", 0] },
-                    },
-                },
-            ])
-
-            if (!result.length) {
-                return res.status(404).json({ message: "No users found." })
-            }
-
-            return res.status(200).json({ data: result })
-        } catch (err) {
-            console.error("Error:", err)
-            return res.status(500).json({
-                error: "An error occurred.",
-            })
         }
     }
 
