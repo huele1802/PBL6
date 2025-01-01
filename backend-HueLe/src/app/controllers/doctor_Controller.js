@@ -214,6 +214,60 @@ class doctor_Controller {
         }
     }
 
+    // update_Doctor_Active_Hour = async(req, res) =>{
+    //     try{
+    //         const {
+    //             day, start_time, end_time, hour_type, appointment_limit,
+    //             old_day, old_start_time, old_end_time, old_hour_type
+    //         } = req.body
+
+    //         if(!day || !start_time || !end_time || !hour_type){
+    //             throw new Error('Missing information')
+    //         }
+
+    //         // get id
+    //         const account_Id = req.params.id
+
+    //         // check overlap
+    //         const excluded_time = {
+    //             day: old_day,
+    //             start_time: old_start_time,
+    //             end_time: old_end_time,
+    //             hour_type: old_hour_type
+    //         }
+    //         const new_Active_Hour = {day, start_time, end_time, hour_type, appointment_limit}
+
+    //         const is_overlap = await Doctor.Is_Time_Overlap(new_Active_Hour, account_Id, excluded_time)
+
+    //         if(is_overlap){
+    //             throw new Error('Overlapping time frame')
+    //         }
+
+    //         // find doctor
+    //         const doctor = await Doctor.findById(account_Id)
+
+    //         // find old active hour
+    //         const index = doctor.active_hours.findIndex(time_frame =>
+    //             time_frame.day === old_day &&
+    //             time_frame.start_time === old_start_time &&
+    //             time_frame.end_time === old_end_time &&
+    //             time_frame.hour_type === old_hour_type
+    //         )
+
+    //         // update
+    //         doctor.active_hours[index] = new_Active_Hour
+
+    //         await doctor.save()
+
+    //         res.status(200).json({change: doctor.active_hours[index],
+    //             active_hours: doctor.active_hours})
+
+    //     }catch(error){
+    //         console.log(error.message)
+    //         res.status(400).json({error: error.message})
+    //     }
+    // }
+
     update_Doctor_Active_Hour = async (req, res) => {
         try {
             const {
@@ -704,7 +758,7 @@ class doctor_Controller {
             }
 
             const doctors = await Doctor.find(query)
-                .select("_id username profile_image bio email")
+                .select("_id username profile_image bio email is_deleted")
                 .populate("speciality_id", "name")
                 .populate("region_id", "name")
 
